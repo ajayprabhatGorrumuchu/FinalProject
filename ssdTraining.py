@@ -108,7 +108,7 @@ if __name__ == '__main__':
     save_path = "model_weights.pth"
 
     # Training loop
-    num_epochs = 10
+    num_epochs = 50
     best_val_loss = float("inf")
     for epoch in range(num_epochs):
         model.train()
