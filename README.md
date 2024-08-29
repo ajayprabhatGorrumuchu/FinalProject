@@ -1,23 +1,42 @@
-Object Detection Models Inference and Training
-                                                                           
-This repository contains scripts for object detection using various models, specifically Faster R-CNN, SSD (Single Shot MultiBox Detector), and YOLOv8x. The provided scripts include training and inference functionalities for these models. The dataset used for training and evaluation is the Open Images Dataset V7.
+# YOLOv8 Parking Space Detection
 
-File Descriptions:
+## Project Overview
 
-FasterRcnn Inference:
-This script performs inference using a pre-trained Faster R-CNN model. It processes input images and generates predictions for object detection.
-Output : https://drive.google.com/file/d/1g9FcCFCA7sur2uYwJv9YdgjHIpoCRfqa/view?usp=share_link
+This project utilizes the YOLOv8 model for detecting cars in a parking lot and determining the occupancy status of parking spaces. The system processes a video input, identifies cars using object detection, and maps them to predefined parking spaces to determine which spots are occupied and which are available.
 
-SSD Training:
-This script trains an SSD model on the Open Images Dataset V7. It includes data loading, model training, and evaluation phases.
+## Files Included
 
-SSD Inference:
-This script performs inference using a pre-trained SSD model. It processes input images and outputs predictions for object detection.
-Output: https://drive.google.com/file/d/1WLaG22UxUya8JjkpXaQ5EbrMvEmFMrEO/view?usp=share_link
+- **`ssd_parking_detection.py`**: A script for parking detection using an SSD (Single Shot Multibox Detector) model.
+- **`yolov8_training.py`**: A script for training the YOLOv8 model on a custom dataset.
+- **`yolov8_parking_detection.py`**: The main script that uses the trained YOLOv8 model to detect cars in a parking lot and determine parking space occupancy.
+- **`requirements.txt`**: A file listing all necessary Python packages to run the project.
+- **`README.md`**: This file.
 
-Yolo Training:
-This script trains an Yolo model on the Open Images Dataset V7. It includes data loading, model training, and evaluation phases.
+## Prerequisites
 
-Yolo Inference:
-This script performs inference using a YOLOv8x model. It processes input images and generates predictions for object detection.
-Output: https://drive.google.com/file/d/1gdTMS8z_A9YtuT1VKt6mAdfHoETQPF_h/view?usp=share_link
+- Python 3.8 or higher
+- A working GPU environment is recommended for faster processing, but the code can also run on a CPU.
+
+## Installation
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/yolov8-parking-detection.git
+    cd yolov8-parking-detection
+    ```
+
+2. Install the required Python packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. Ensure that you have the necessary video files and dataset for training.
+
+## Usage
+
+### 1. Train the YOLOv8 Model
+
+To train the YOLOv8 model on your custom dataset, use the `yolov8_training.py` script:
+
+```bash
+python yolov8_training.py
