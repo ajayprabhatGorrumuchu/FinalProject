@@ -2,7 +2,8 @@ import torch
 from torchvision import models, transforms
 import cv2
 import numpy as np
-from torchvision.models.detection.ssd import SSD300_VGG16_Weights
+import time
+import psutil
 
 # Load the SSD model architecture
 model = models.detection.ssd300_vgg16(weights=None)  # No pretrained weights
@@ -30,32 +31,33 @@ output_path = 'ssdOutput.mp4'
 # Initialize the VideoWriter with the size of the cropped frames
 out = cv2.VideoWriter(output_path, fourcc, 1, (width - 550, height - 200))
 
-# Parking positions (unchanged)
-parking_positions = {"a1": [(188, 495), (194, 418), (35, 457), (15, 518)],
-                     "a2": [(194, 418), (196, 364), (65, 388), (37, 455)],
-                     "a3": [(197, 365), (203, 320), (84, 337), (65, 387)],
-                     "a4": [(204, 318), (84, 337), (99, 298), (206, 286)],
-                     "a5": [(149, 177), (210, 175), (212, 165), (152, 168)],
-                     "a6": [(215, 154), (155, 157), (152, 168), (212, 165)],
-                     "a7": [(215, 154), (155, 157), (162, 147), (215, 144)],
-                     "a8": [(162, 147), (215, 144), (216, 138), (163, 140)],
-                     "a9": [(216, 138), (163, 140), (168, 130), (216, 127)],
-                     "b1": [(340, 340), (439, 319), (418, 288), (326, 305)],
-                     "b2": [(418, 288), (326, 305), (316, 275), (401, 260)],
-                     "b3": [(316, 275), (401, 260), (388, 238), (310, 251)],
-                     "b4": [(388, 238), (310, 251), (304, 228), (375, 217)],
-                     "b5": [(304, 228), (375, 217), (365, 200), (299, 211)],
-                     "b6": [(365, 200), (299, 211), (294, 195), (357, 186)],
-                     "b7": [(294, 195), (357, 186), (348, 173), (290, 178)],
-                     "r1": [(205, 284), (103, 298), (113, 272), (206, 262)],
-                     "r2": [(210, 240), (124, 247), (130, 229), (210, 222)],
-                     "r3": [(130, 229), (210, 222), (210, 205), (138, 211)],
-                     "r4": [(213, 192), (143, 196), (145, 185), (214, 181)]
-                     }
+parking_positions = {
+"a1": [(188, 495), (194, 418), (35, 457), (15, 518)],
+    "a2": [(194, 418), (196, 364), (65, 388), (37, 455)],
+    "a3": [(197, 365), (203, 320), (84, 337), (65, 387)],
+    "a4": [(204, 318), (84, 337), (99, 298), (206, 286)],
+    "a5": [(149, 177), (210, 175), (212, 165), (152, 168)],
+    "a6": [(215, 154), (155, 157), (152, 168), (212, 165)],
+    "a7": [(215, 154), (155, 157), (162, 147), (215, 144)],
+    "a8": [(162, 147), (215, 144), (216, 138), (163, 140)],
+    "a9": [(216, 138), (163, 140), (168, 130), (216, 127)],
+    "b1": [(340, 340), (439, 319), (418, 288), (326, 305)],
+    "b2": [(418, 288), (326, 305), (316, 275), (401, 260)],
+    "b3": [(316, 275), (401, 260), (388, 238), (310, 251)],
+    "b4": [(388, 238), (310, 251), (304, 228), (375, 217)],
+    "b5": [(304, 228), (375, 217), (365, 200), (299, 211)],
+    "b6": [(365, 200), (299, 211), (294, 195), (357, 186)],
+    "b7": [(294, 195), (357, 186), (348, 173), (290, 178)],
+    "r1": [(205, 284), (103, 298), (113, 272), (206, 262)],
+    "r2": [(210, 240), (124, 247), (130, 229), (210, 222)],
+    "r3": [(130, 229), (210, 222), (210, 205), (138, 211)],
+    "r4": [(213, 192), (143, 196), (145, 185), (214, 181)]}
 
 tot_parking = len(parking_positions.keys())
 
 while cap.isOpened():
+    start_time = time.time()  # Start timing
+
     ret, frame = cap.read()
     if not ret:
         break
@@ -78,7 +80,7 @@ while cap.isOpened():
 
     # Draw the bounding boxes on the frame
     for box, score, label in zip(outputs[0]['boxes'], outputs[0]['scores'], outputs[0]['labels']):
-        if score > 0.12 and label in [3]:  # Labels 3 and 8 correspond to 'car' and 'truck'
+        if score > 0.12 and label in [3]:
             x1, y1, x2, y2 = box.int().numpy()
             cx = (x1 + x2) // 2
             cy = (y1 + y2) // 2
@@ -86,8 +88,6 @@ while cap.isOpened():
             cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
             cv2.circle(frame, (cx, cy), 8, (0, 255, 0), -1)
             cv2.putText(frame, 'car', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
-
-
 
     # Store names of occupied parkings
     occupied_parkings = set()
@@ -129,6 +129,15 @@ while cap.isOpened():
 
     # Show frame with bounding boxes and parking info
     cv2.imshow("Parking Detection", frame)
+    cv2.imwrite("ssdOutput.jpg",frame)
+
+    end_time = time.time()  # End timing
+    frame_time = end_time - start_time  # Calculate frame processing time
+    cpu_usage = psutil.cpu_percent(interval=1)  # Get CPU usage over the interval
+
+    print(f"Time per frame: {frame_time:.4f} seconds")
+    print(f"CPU Usage: {cpu_usage}%")
+
     key = cv2.waitKey(1)
     if key == 27:  # ESC key to exit
         break
